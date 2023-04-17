@@ -36,3 +36,13 @@ button {
 button:hover {
   border-color: black;
 }
+
+h1 {
+  font-size: 2rem;
+  line-height: 2.25rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}

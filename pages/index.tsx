@@ -1,16 +1,41 @@
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
-import { signIn, signOut, useSession } from 'next-auth/react'
+import { getSession, signIn, signOut, useSession } from 'next-auth/react'
+import { GetServerSideProps } from 'next';
+import Nextauth from './api/auth/[...nextauth]';
+import { AppProps } from 'next/app';
+import { Character } from '@/lib/db/characters';
+import { ObjectId } from 'mongodb';
+import { emailToID } from '@/lib/db/users';
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
-  const {data: session, status } = useSession();
+interface IndexProps {
+  status: string,
+  session: {
+    user: {
+      name: string,
+      email: string
+    }
+  },
+  characters: Character[]
+}
+
+export default function Home(props: IndexProps) {
+  const { status } = useSession();
 
   if(status === "authenticated")
     return (
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <button onClick={() => signOut()}>Sign Out</button>
+      <main className="flex min-h-screen flex-col items-left p-24">
+        <div className="flex flex-row mb-8">
+          <h2 className='pr-3 pt-1'>Signed in as <strong>{props.session.user?.name}</strong></h2>
+          <button className='pl-1 pr-1 text-xl' onClick={() => signOut()}>Sign Out</button>
+        </div>
+
+        <h1>Characters</h1>
+        <div>
+          { props.characters.map((character) => <button>{character.name}</button>)}
+        </div>
       </main>
     );
 
@@ -31,9 +56,9 @@ export default function Home() {
       </div>
 
       <div className="mb-24 pb-16 flex items-center justify-center w-screen text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <button onClick={() => signIn("google")}>
+        <button onClick={() => signIn()} className="pl-2 pr-2">
           <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Sign in with Google{' '}
+            Sign in/Create Account{' '}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -46,4 +71,15 @@ export default function Home() {
 
     </main>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getSession(context);
+
+  return {
+    props: {
+      session: session,
+      characters: []
+    }
+  }
 }
