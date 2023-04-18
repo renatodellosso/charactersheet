@@ -4,9 +4,11 @@ import { getSession, signIn, signOut, useSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next';
 import Nextauth from './api/auth/[...nextauth]';
 import { AppProps } from 'next/app';
-import { Character } from '@/lib/db/characters';
+import { Character, cleanCharacters, getCharacters } from '@/lib/db/characters';
 import { ObjectId } from 'mongodb';
 import { emailToID } from '@/lib/db/users';
+import { characters } from '../lib/db/db';
+import Router from 'next/router';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,6 +21,27 @@ interface IndexProps {
     }
   },
   characters: Character[]
+}
+
+async function newCharacter() {
+  console.log("Creating new character...");
+
+  try {
+    const res = await fetch('/api/character/new');
+    const data = await res.json();
+
+    console.log(data);
+
+  } catch(err) {
+    console.log(err);
+  }
+}
+
+async function goToSheet(id: string) {
+  console.log("Going to sheet... Id: " + id);
+  Router.push( { pathname: `/protected/sheet`, query: {
+    id: id
+  }});
 }
 
 export default function Home(props: IndexProps) {
@@ -34,8 +57,12 @@ export default function Home(props: IndexProps) {
 
         <h1>Characters</h1>
         <div>
-          { props.characters.map((character) => <button>{character.name}</button>)}
+          { props.characters.map((character) => 
+            <button key={character.idString} onClick={() => goToSheet(character.idString)} className='m-2 p-1'>
+              {character.name}
+            </button>)}
         </div>
+        <button onClick={() => newCharacter()} className='ml-2 mr-2'><strong>Create new character</strong></button>
       </main>
     );
 
@@ -75,11 +102,22 @@ export default function Home(props: IndexProps) {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
+  const userID = await emailToID(session?.user?.email!);
 
-  return {
-    props: {
-      session: session,
-      characters: []
+  if(userID) {
+    const characters: Character[] = cleanCharacters(await getCharacters(userID!));
+
+    return {
+      props: {
+        session: session,
+        characters: characters
+      }
+    }
+  } else {
+    return {
+      props: {
+        session: session
+      }
     }
   }
 }

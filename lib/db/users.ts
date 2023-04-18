@@ -1,11 +1,12 @@
 import { Document, ObjectId, WithId } from "mongodb";
 import { users } from "./db";
 
-export interface User {
+export interface User extends Document {
     _id: ObjectId,
     name: string,
     email: string,
-    image: string
+    image: string,
+    characters: ObjectId[]
 }
 
 export async function getUser(_id: ObjectId): Promise<WithId<User> | null> {
