@@ -1,13 +1,19 @@
-import SheetHeader from "@/components/sheetHeader";
-import { Character, cleanCharacter, cleanCharacters, getCharacter, getCharacters } from "@/lib/db/characters";
+import SheetHeader from "@/components/tabs/sheetHeader";
+import {     cleanCharacter, cleanCharacters, getCharacter, getCharacters } from "@/lib/db/characters";
 import { emailToID } from "@/lib/db/users";
 import { ObjectId } from "mongodb";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import { getSession } from "next-auth/react";
-import { ChangeEventHandler, FormEvent } from "react";
+import { ChangeEventHandler, FormEvent, useState } from "react";
 import { authOptions } from "../api/auth/[...nextauth]";
 import Router from "next/router";
+import { Character } from "@/lib/characterDefs";
+import MainTab from "@/components/tabs/mainTab";
+
+enum Tab {
+    Main = "main"
+}
 
 interface SheetProps {
     session: {
@@ -16,7 +22,8 @@ interface SheetProps {
             email: string
         }
     },
-    character: Character
+    character: Character,
+    tab: Tab
 }
 
 const onChange = async (event: FormEvent<HTMLInputElement>) => {
@@ -51,6 +58,9 @@ export default function Sheet(props: SheetProps) {
             <main className="min-h-screen">
                 <form>
                     <SheetHeader character={props.character} onChange={onChange}></SheetHeader>
+                    {
+                        props.tab == Tab.Main ? <MainTab character={props.character}></MainTab> : <></>
+                    }
                 </form>
             </main>
         )
@@ -75,10 +85,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         
             if(character) character = cleanCharacter(character);        
 
+            let tab = Tab.Main;
+            if(context.query.tab) tab = context.query.tab as Tab;
+
             return {
                 props: {
                     session: session,
-                    character: character
+                    character: character,
+                    tab: tab
                 }
             }
         }

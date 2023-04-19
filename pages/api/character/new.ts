@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log("User creating a new character... User ID: " + userID);
         if(userID) {
             const character = await newCharacter(userID);
-            res.status(200).json({ Character: character });
+            res.status(200).json({ id: character });
         } else {
             res.status(401).json({ error: "User not found" });
         }

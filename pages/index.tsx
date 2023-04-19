@@ -2,10 +2,11 @@ import { Inter } from 'next/font/google'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next';
 import { authOptions } from './api/auth/[...nextauth]';
-import { Character, cleanCharacters, getCharacters } from '@/lib/db/characters';
+import { cleanCharacters, getCharacters } from '@/lib/db/characters';
 import { emailToID } from '@/lib/db/users';
 import Router from 'next/router';
 import { getServerSession } from 'next-auth';
+import { Character } from '@/lib/characterDefs';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,6 +28,7 @@ async function newCharacter() {
     const res = await fetch('/api/character/new');
     const data = await res.json();
 
+    goToSheet(data.id);
     console.log(data);
 
   } catch(err) {
@@ -98,7 +100,7 @@ export default function Home(props: IndexProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await await getServerSession(context.req, context.res, authOptions);
+  const session = await getServerSession(context.req, context.res, authOptions);
   const userID = await emailToID(session?.user?.email!);
 
   if(userID) {

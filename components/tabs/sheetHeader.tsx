@@ -1,4 +1,4 @@
-import { Character } from "@/lib/db/characters";
+import { Character } from "@/lib/characterDefs";
 import { ChangeEventHandler } from "react";
 
 interface SheetHeaderProps {

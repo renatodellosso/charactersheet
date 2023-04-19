@@ -1,6 +1,6 @@
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { User } from "./users";
-import { Character } from "./characters";
+import { Character } from "../characterDefs";
 
 let client = new MongoClient(process.env.MONGODB_URI!);
 

@@ -1,18 +1,30 @@
+import { Character, Stat } from '../characterDefs';
 import { characters, users } from './db';
-import { Document, ObjectId, UpdateFilter } from 'mongodb';
+import { ObjectId, UpdateFilter } from 'mongodb';
 
-export interface Character extends Document {
-    _id: ObjectId | null,
-    idString: string,
-    owner: ObjectId | null,
-    name: string,
-}
+function initCharacter(owner: ObjectId): Character {
+    const _id = new ObjectId();
+
+    return { 
+        _id: _id, 
+        idString: _id.toString(), 
+        owner: owner, 
+        name: "New Character",
+        abilityScores: {
+            ["Str"]: new Stat("Str", 10),
+            ["Dex"]: new Stat("Dex", 10),
+            ["Con"]: new Stat("Con", 10),
+            ["Int"]: new Stat("Int", 10),
+            ["Wis"]: new Stat("Wis", 10),
+            ["Cha"]: new Stat("Cha", 10),
+        }
+    }
+} 
 
 export async function newCharacter(owner: ObjectId): Promise<ObjectId> {
-    const _id = new ObjectId();
-    const character = (await characters.insertOne({ _id: _id, idString: _id.toString(), owner: owner, name: "New Character" })).insertedId;
+    const character = (await characters.insertOne(initCharacter(owner))).insertedId;
 
-    users.updateOne({ _id: owner }, { $push: { characters: character } })
+    await users.updateOne({ _id: owner }, { $push: { characters: character } })
 
     return character!;
 }
@@ -45,6 +57,7 @@ export async function getCharacters(owner: ObjectId): Promise<Character[]> {
 }
 
 export function cleanCharacter(character: Character): Character {
+    character.idString = character._id!.toString();
     character._id = null;
     character.owner = null;
 

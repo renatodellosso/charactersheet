@@ -4,7 +4,8 @@ import Nextauth, { authOptions } from "../auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { doesUserOwnCharacter, emailToID } from "@/lib/db/users";
 import { ObjectId, UpdateFilter } from "mongodb";
-import { Character, updateCharacter } from "@/lib/db/characters";
+import { updateCharacter } from "@/lib/db/characters";
+import { Character } from "@/lib/characterDefs";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getServerSession(req, res, authOptions);
@@ -22,10 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 body.characterID = new ObjectId(body.characterID);
 
                 //Clean the _id from the object
-                const keys = Object.keys(body.update);
-                keys.forEach(key => {
-                    delete body.update[key]["_id"];
-                });
+                delete body.update._id;
 
                 if(await doesUserOwnCharacter(userID, body.characterID)) {
                     console.log("User updating character... User ID: " + userID + ", body: \n\t" + JSON.stringify(body));
