@@ -24,3 +24,9 @@ export async function getUserByEmail(email: string): Promise<WithId<User> | null
         return getUser(id!);
     })
 }
+
+export async function doesUserOwnCharacter(owner: ObjectId, character: ObjectId): Promise<boolean> {
+    const user = await getUser(owner);
+
+    return user?.characters.some(c => c.equals(character)) ?? false;
+}

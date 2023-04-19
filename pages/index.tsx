@@ -1,14 +1,11 @@
-import Image from 'next/image'
 import { Inter } from 'next/font/google'
-import { getSession, signIn, signOut, useSession } from 'next-auth/react'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next';
-import Nextauth from './api/auth/[...nextauth]';
-import { AppProps } from 'next/app';
+import { authOptions } from './api/auth/[...nextauth]';
 import { Character, cleanCharacters, getCharacters } from '@/lib/db/characters';
-import { ObjectId } from 'mongodb';
 import { emailToID } from '@/lib/db/users';
-import { characters } from '../lib/db/db';
 import Router from 'next/router';
+import { getServerSession } from 'next-auth';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -101,7 +98,7 @@ export default function Home(props: IndexProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const session = await await getServerSession(context.req, context.res, authOptions);
   const userID = await emailToID(session?.user?.email!);
 
   if(userID) {

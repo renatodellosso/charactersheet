@@ -1,5 +1,5 @@
 import { characters, users } from './db';
-import { Document, ObjectId } from 'mongodb';
+import { Document, ObjectId, UpdateFilter } from 'mongodb';
 
 export interface Character extends Document {
     _id: ObjectId | null,
@@ -57,4 +57,8 @@ export function cleanCharacters(characters: Character[]): Character[] {
     characters.forEach(cleanCharacter);
 
     return characters;
+}
+
+export async function updateCharacter(characterID: ObjectId, update: Partial<Character> | UpdateFilter<Character>) {
+    characters.updateOne({ _id: characterID }, update);
 }

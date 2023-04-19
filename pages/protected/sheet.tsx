@@ -3,8 +3,11 @@ import { Character, cleanCharacter, cleanCharacters, getCharacter, getCharacters
 import { emailToID } from "@/lib/db/users";
 import { ObjectId } from "mongodb";
 import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
 import { getSession } from "next-auth/react";
 import { ChangeEventHandler, FormEvent } from "react";
+import { authOptions } from "../api/auth/[...nextauth]";
+import Router from "next/router";
 
 interface SheetProps {
     session: {
@@ -16,8 +19,30 @@ interface SheetProps {
     character: Character
 }
 
-const onChange = (event: FormEvent<HTMLInputElement>) => {
+const onChange = async (event: FormEvent<HTMLInputElement>) => {
     console.log("Form changed. "+ event.currentTarget.name + ": " + event.currentTarget.value);
+
+    event.preventDefault();
+
+    const update = {
+        $set: Object()
+    }
+
+    update.$set[event.currentTarget.name] = event.currentTarget.value;
+    
+    const res = await fetch('/api/character/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+            characterID: Router.query.id,
+            update: update
+        })
+    });
+    const data = await res.json();
+    console.log(data);
 }
 
 export default function Sheet(props: SheetProps) {
@@ -40,7 +65,7 @@ export default function Sheet(props: SheetProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-    const session = await getSession(context);
+    const session = await getServerSession(context.req, context.res, authOptions);
     const userID = await emailToID(session?.user?.email!);
 
     if(userID) {

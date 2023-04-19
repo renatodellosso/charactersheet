@@ -1,12 +1,13 @@
 import clientPromise from "@/lib/mongodbadapter";
-import NextAuth, { getServerSession } from "next-auth";
+import NextAuth, { getServerSession, AuthOptions } from "next-auth";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import DiscordProvider from "next-auth/providers/discord";
 
-export default NextAuth({
+export const authOptions: AuthOptions = {
+    secret: process.env.JWT_SECRET,
     adapter: MongoDBAdapter(clientPromise, {
         databaseName: process.env.DB_NAME
     }),
@@ -27,4 +28,6 @@ export default NextAuth({
             clientSecret: process.env.DISCORD_CLIENT_SECRET!
         })
     ]
-})
+}
+
+export default NextAuth(authOptions);
