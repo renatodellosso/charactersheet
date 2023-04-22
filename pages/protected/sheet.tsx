@@ -10,6 +10,7 @@ import { authOptions } from "../api/auth/[...nextauth]";
 import Router from "next/router";
 import { Character } from "@/lib/characterDefs";
 import MainTab from "@/components/tabs/mainTab";
+import { Popup, PopupProps } from "@/components/popup";
 
 enum Tab {
     Main = "main"
@@ -52,15 +53,28 @@ const onChange = async (event: FormEvent<HTMLInputElement>) => {
     console.log(data);
 }
 
+const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+}
+
 export default function Sheet(props: SheetProps) {
+    const [popup, setPopup] = useState<PopupProps>({
+        open: false,
+    });
+    
     if(props.character) {
         return (
             <main className="min-h-screen">
-                <form>
+                <form onSubmit={onSubmit}>
                     <SheetHeader character={props.character} onChange={onChange}></SheetHeader>
                     {
-                        props.tab == Tab.Main ? <MainTab character={props.character}></MainTab> : <></>
+                        props.tab == Tab.Main ? <MainTab character={props.character} setPopup={setPopup}></MainTab> : <></>
                     }
+                    { popup.open && 
+                        <Popup toggle={() => setPopup({ open: false })} open={popup.open} title={popup.title}>
+                            {popup.children}
+                        </Popup>
+                    } 
                 </form>
             </main>
         )
