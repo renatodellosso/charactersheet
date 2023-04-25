@@ -1,4 +1,6 @@
-import { Stat } from "./characterDefs";
+import Router from "next/router";
+import { Character, Stat } from "./characterDefs";
+import { UpdateFilter } from "mongodb";
 
 export function getStatValue(stat: Stat): number {
     let value: number = 0;
@@ -28,4 +30,25 @@ export function getAbilityScoreModifierText(stat: Stat): string {
     const value = abilityScoreToModifier(stat);
 
     return formatModifier(value);
+}
+
+export async function update(update: Partial<Character> | UpdateFilter<Character>) {
+    console.log("Updating... Update:");
+    console.log(update);
+
+    const res = await fetch('/api/character/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+            characterID: Router.query.id,
+            update: update
+        })
+    });
+    
+    const data = await res.json();
+    console.log("Response:");
+    console.log(data);
 }

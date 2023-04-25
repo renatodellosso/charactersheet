@@ -14,14 +14,13 @@ export default function MainTab(props: MainTabProps) {
     if(props.character.abilityScores)
         keys = Object.keys(props.character.abilityScores);
 
-    console.log("Rendering main tab...");
-
     keys?.forEach((key) => {
-        abilityScores.push(<AbilityScore key={key} abilityScore={props.character.abilityScores[key]} setPopup={props.setPopup}></AbilityScore>)
+        abilityScores.push(<AbilityScore key={key} abilityScore={props.character.abilityScores[key as keyof typeof props.character.abilityScores]} 
+            setPopup={props.setPopup}></AbilityScore>)
     });
 
     return <div>
-        <div className="max-w-[5%]">
+        <div className="max-w-[8%]">
             {abilityScores}
         </div>
     </div>

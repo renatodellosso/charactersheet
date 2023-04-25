@@ -11,12 +11,12 @@ function initCharacter(owner: ObjectId): Character {
         owner: owner, 
         name: "New Character",
         abilityScores: {
-            ["Str"]: new Stat("Str", 10, "Strength"),
-            ["Dex"]: new Stat("Dex", 10, "Dexterity"),
-            ["Con"]: new Stat("Con", 10, "Constitution"),
-            ["Int"]: new Stat("Int", 10, "Intelligence"),
-            ["Wis"]: new Stat("Wis", 10, "Wisdom"),
-            ["Cha"]: new Stat("Cha", 10, "Charisma"),
+            str: new Stat("Str", 10, "Strength"),
+            dex: new Stat("Dex", 10, "Dexterity"),
+            con: new Stat("Con", 10, "Constitution"),
+            int: new Stat("Int", 10, "Intelligence"),
+            wis: new Stat("Wis", 10, "Wisdom"),
+            cha: new Stat("Cha", 10, "Charisma"),
         }
     }
 } 

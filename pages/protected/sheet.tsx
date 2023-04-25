@@ -11,6 +11,7 @@ import Router from "next/router";
 import { Character } from "@/lib/characterDefs";
 import MainTab from "@/components/tabs/mainTab";
 import { Popup, PopupProps } from "@/components/popup";
+import { update } from "@/lib/clientUtil";
 
 enum Tab {
     Main = "main"
@@ -32,25 +33,12 @@ const onChange = async (event: FormEvent<HTMLInputElement>) => {
 
     event.preventDefault();
 
-    const update = {
+    const updateObj = {
         $set: Object()
     }
 
-    update.$set[event.currentTarget.name] = event.currentTarget.value;
-    
-    const res = await fetch('/api/character/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        mode: 'cors',
-        body: JSON.stringify({
-            characterID: Router.query.id,
-            update: update
-        })
-    });
-    const data = await res.json();
-    console.log(data);
+    updateObj.$set[event.currentTarget.name] = event.currentTarget.value;
+    update(updateObj);
 }
 
 const onSubmit = async (event: FormEvent<HTMLFormElement>) => {

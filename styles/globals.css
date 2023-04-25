@@ -37,6 +37,20 @@ button:hover {
   border-color: black;
 }
 
+input {
+  border: 2px solid gray;
+  padding: 3px;
+  transition: border-color 0.2s;
+}
+
+input:hover {
+  border-color: dimgray;
+}
+
+input:active {
+  border-color: black;
+}
+
 h1 {
   font-size: 2rem;
   line-height: 2.25rem;
@@ -45,4 +59,15 @@ h1 {
 h2 {
   font-size: 1.25rem;
   line-height: 1.75rem;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 2px solid black;
+}
+
+tr, th, td {
+  border: 1px solid black;
+  padding: 3px;
 }
