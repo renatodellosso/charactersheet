@@ -60,7 +60,7 @@ export default function Sheet(props: SheetProps) {
                     }
                     { popup.open && 
                         <Popup toggle={() => setPopup({ open: false })} open={popup.open} title={popup.title}>
-                            {popup.children}
+                            { popup.getChildren ? popup.getChildren(props.character, popup.arg ? popup.arg : "") : <></> }
                         </Popup>
                     } 
                 </form>
@@ -79,6 +79,8 @@ export default function Sheet(props: SheetProps) {
 export const getServerSideProps: GetServerSideProps = async (context) => {
     const session = await getServerSession(context.req, context.res, authOptions);
     const userID = await emailToID(session?.user?.email!);
+
+    console.log("Generating server side props...");
 
     if(userID) {
         let character: Character | null = await getCharacter(new ObjectId(context.query.id as string));

@@ -52,3 +52,8 @@ export async function update(update: Partial<Character> | UpdateFilter<Character
     console.log("Response:");
     console.log(data);
 }
+
+export function refresh() {
+    console.log("Refreshing...");
+    Router.push(Router.asPath);
+}

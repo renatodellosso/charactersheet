@@ -1,23 +1,26 @@
 import { Character, Stat } from "@/lib/characterDefs"
-import { abilityScoreToModifier, formatModifier, getAbilityScoreModifierText, getStatText, getStatValue, update } from "@/lib/clientUtil";
+import { abilityScoreToModifier, formatModifier, getAbilityScoreModifierText, getStatText, getStatValue, refresh, update } from "@/lib/clientUtil";
 import { useState } from "react";
 import { PopupProps } from "./popup";
 import { UpdateFilter } from "mongodb";
+import Router from "next/router";
 
 interface AbilityScoreProps {
     abilityScore: Stat,
     setPopup: (value: PopupProps) => void,
 }
 
-function openPopup(setPopup: (value: PopupProps) => void, props: AbilityScoreProps) {
+function getChildren(character: Character, arg: string): JSX.Element {
+    const abilityScore = character.abilityScores[arg as keyof typeof character.abilityScores];
+
     let addNew: Partial<Character> | UpdateFilter<Character> = {
-            $push: Object()
+        $push: Object()
     }
 
     if(addNew.$push != undefined) {
         (addNew.$push as any) = {
-            ["abilityScores." + props.abilityScore.name.toLowerCase() + ".bonuses"]: {
-                    reason: "New Bonus",
+            ["abilityScores." + abilityScore.name.toLowerCase() + ".bonuses"]: {
+                    reason: "New Bonus " + (abilityScore.bonuses.filter(bonus => bonus.reason.startsWith("New Bonus")).length + 1).toString(),
                     value: 0,
                     nameEditable: true,
                     valueEditable: true
@@ -28,40 +31,63 @@ function openPopup(setPopup: (value: PopupProps) => void, props: AbilityScorePro
         console.log(addNew);
     }
 
+    const remove = (reason: string, value: number): any => {
+        return {
+            $pull: {
+                ["abilityScores." + abilityScore.name.toLowerCase() + ".bonuses"]: {
+                        reason: reason,
+                        value: value
+                }
+            }
+        }
+    }
+
     let content = <div> 
-            <table>
-                <tbody>
-                    <tr>
-                        <th>Reason</th>
-                        <th>Bonus</th>
-                    </tr>
-                    {
-                        props.abilityScore.bonuses.map((bonus) => {
-                            console.log(bonus);
-                        return <tr key={bonus.reason}>
+        <table>
+            <tbody>
+                <tr>
+                    <th>Reason</th>
+                    <th>Bonus</th>
+                </tr>
+                {
+                    abilityScore.bonuses.map((bonus, index) => {
+                        return <tr key={bonus.reason + index}>
                             <td>{
                                 bonus.nameEditable ? 
-                                    <input name={bonus.reason + ".name"} id={bonus.reason + ".name"} defaultValue={bonus.reason}></input> :
+                                    <input name={index + ".name"} id={index + ".name"} defaultValue={bonus.reason}></input> :
                                     bonus.reason
                             }</td>
                             <td>{
                                 bonus.valueEditable ? 
-                                    <input name={bonus.reason + ".value"} id={bonus.reason + ".value"} defaultValue={bonus.value}>
+                                    <input name={index + ".value"} id={index + ".value"} defaultValue={bonus.value}>
                                     </input> : formatModifier(bonus.value)
                             }</td>
+                            {
+                                bonus.nameEditable ?
+                                <td><button onClick={async ()=>{ await update(remove(bonus.reason, bonus.value)); refresh();}} 
+                                    className="rounded-none border-red-200 hover:border-red-500">Delete</button></td> :
+                                <></>
+                            }
                         </tr>
-                        })
-                    }
-                </tbody>
-            </table>
-            <button onClick={() => update(addNew)}>Add new</button>
-        </div>
+                    })
+                }
+            </tbody>
+        </table>
+        <button onClick={async () => { await update(addNew); refresh(); }}>Add new</button>
+    </div>
+
+    return content;
+}
+
+function openPopup(setPopup: (value: PopupProps) => void, props: AbilityScoreProps) {
+    
 
     setPopup({
         open: true,
         title: (props.abilityScore.fullName || props.abilityScore.name) + " (" + getStatValue(props.abilityScore) + ", " + 
             formatModifier(abilityScoreToModifier(props.abilityScore)) + ")",
-        children: content
+        arg: props.abilityScore.name.toLowerCase(),
+        getChildren: getChildren,
     })
 }
 

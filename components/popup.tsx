@@ -1,7 +1,11 @@
+import { Character } from "@/lib/characterDefs"
+
 export interface PopupProps {
     open: boolean,
     toggle?: () => void,
     title?: string,
+    arg?: string,
+    getChildren?: (character: Character, arg: string) => JSX.Element,
     children?: JSX.Element
 }
 
@@ -12,7 +16,7 @@ export const Popup = (props: PopupProps) => {
                 <h1>{props.title}</h1>
                 <button onClick={props.toggle}>Close</button>
             </div>
-            {props.children}
+            { props.children }
         </div>
     </div>
 }
