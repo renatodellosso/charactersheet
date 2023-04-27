@@ -1,11 +1,13 @@
 import Router from "next/router";
 import { Character, Stat } from "./characterDefs";
 import { UpdateFilter } from "mongodb";
+import toast from "react-hot-toast";
 
 export function getStatValue(stat: Stat): number {
     let value: number = 0;
 
     stat.bonuses.forEach(bonus => {
+        if(typeof bonus.value === "string") bonus.value = parseInt(bonus.value); 
         value += bonus.value;
     });
 
@@ -32,7 +34,7 @@ export function getAbilityScoreModifierText(stat: Stat): string {
     return formatModifier(value);
 }
 
-export async function update(update: Partial<Character> | UpdateFilter<Character>) {
+async function updateInternal(update: Partial<Character> | UpdateFilter<Character>) {
     console.log("Updating... Update:");
     console.log(update);
 
@@ -53,7 +55,23 @@ export async function update(update: Partial<Character> | UpdateFilter<Character
     console.log(data);
 }
 
+export function update(update: Partial<Character> | UpdateFilter<Character>, reload: boolean = true) {
+    toast.promise(updateInternal(update),
+    {
+        loading: "Updating...",
+        success: "Updated!",
+        error: "Failed to update."
+    }).then(() => {
+        if(reload) refresh();
+    });
+}
+
 export function refresh() {
     console.log("Refreshing...");
-    Router.push(Router.asPath);
+    toast.promise(Router.push(Router.asPath),
+    {
+        loading: "Refreshing...",
+        success: "Refreshed!",
+        error: "Failed to refresh."
+    });
 }

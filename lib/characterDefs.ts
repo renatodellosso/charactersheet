@@ -3,7 +3,8 @@ import { ObjectId } from "mongodb";
 export class Stat {
     name: string;
     fullName?: string;
-    bonuses: { 
+    bonuses: {
+        _id: string,
         reason: string,
         value: number,
         nameEditable: boolean,
@@ -14,7 +15,7 @@ export class Stat {
         this.name = name;
         this.fullName = fullName || name;
         this.bonuses = [
-            { reason: "Base", value: base, nameEditable: false, valueEditable: true }
+            { _id: new ObjectId().toString(), reason: "Base", value: base, nameEditable: false, valueEditable: true }
         ];
     }
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PopupProps } from "./popup";
 import { UpdateFilter } from "mongodb";
 import Router from "next/router";
+import { onChange } from "@/pages/protected/sheet";
 
 interface AbilityScoreProps {
     abilityScore: Stat,
@@ -31,19 +32,21 @@ function getChildren(character: Character, arg: string): JSX.Element {
         console.log(addNew);
     }
 
-    const remove = (reason: string, value: number): any => {
+    const remove = (_id: string, reason: string, value: number): any => {
         return {
             $pull: {
                 ["abilityScores." + abilityScore.name.toLowerCase() + ".bonuses"]: {
-                        reason: reason,
-                        value: value
+                    _id: _id,
+                    reason: reason,
+                    value: value,
+                    nameEditable: true
                 }
             }
         }
     }
 
     let content = <div> 
-        <table>
+        <table className="mb-1">
             <tbody>
                 <tr>
                     <th>Reason</th>
@@ -51,20 +54,23 @@ function getChildren(character: Character, arg: string): JSX.Element {
                 </tr>
                 {
                     abilityScore.bonuses.map((bonus, index) => {
+                        const updateString = "abilityScores." + abilityScore.name.toLowerCase() + ".bonuses." + index;
                         return <tr key={bonus.reason + index}>
                             <td>{
                                 bonus.nameEditable ? 
-                                    <input name={index + ".name"} id={index + ".name"} defaultValue={bonus.reason}></input> :
+                                    <input onChange={onChange} name={updateString + ".reason"} id={updateString + ".reason"} 
+                                        defaultValue={bonus.reason}></input> :
                                     bonus.reason
                             }</td>
                             <td>{
                                 bonus.valueEditable ? 
-                                    <input name={index + ".value"} id={index + ".value"} defaultValue={bonus.value}>
+                                    <input onChange={onChange} type="number" name={updateString + ".value"} id={updateString + ".value"} 
+                                        defaultValue={bonus.value}>
                                     </input> : formatModifier(bonus.value)
                             }</td>
                             {
                                 bonus.nameEditable ?
-                                <td><button onClick={async ()=>{ await update(remove(bonus.reason, bonus.value)); refresh();}} 
+                                <td><button onClick={async () => update(remove(bonus._id, bonus.reason, bonus.value))} 
                                     className="rounded-none border-red-200 hover:border-red-500">Delete</button></td> :
                                 <></>
                             }
@@ -73,19 +79,24 @@ function getChildren(character: Character, arg: string): JSX.Element {
                 }
             </tbody>
         </table>
-        <button onClick={async () => { await update(addNew); refresh(); }}>Add new</button>
+        <button className="pl-1 pr-1" onClick={async () => update(addNew)}>Add New Bonus</button>
     </div>
 
     return content;
 }
 
-function openPopup(setPopup: (value: PopupProps) => void, props: AbilityScoreProps) {
-    
+function getTitle(character: Character, arg: string): string {
+    if(arg) {
+        const abilityScore = character.abilityScores[arg as keyof typeof character.abilityScores];
+        return (abilityScore.fullName || abilityScore.name) + " (" + getStatValue(abilityScore) + ", " + 
+            formatModifier(abilityScoreToModifier(abilityScore)) + ")";
+    } else return "";
+}
 
+function openPopup(setPopup: (value: PopupProps) => void, props: AbilityScoreProps) {
     setPopup({
         open: true,
-        title: (props.abilityScore.fullName || props.abilityScore.name) + " (" + getStatValue(props.abilityScore) + ", " + 
-            formatModifier(abilityScoreToModifier(props.abilityScore)) + ")",
+        getTitle: getTitle,
         arg: props.abilityScore.name.toLowerCase(),
         getChildren: getChildren,
     })

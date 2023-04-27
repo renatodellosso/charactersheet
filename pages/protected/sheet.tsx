@@ -11,7 +11,7 @@ import Router from "next/router";
 import { Character } from "@/lib/characterDefs";
 import MainTab from "@/components/tabs/mainTab";
 import { Popup, PopupProps } from "@/components/popup";
-import { update } from "@/lib/clientUtil";
+import { refresh, update } from "@/lib/clientUtil";
 
 enum Tab {
     Main = "main"
@@ -28,7 +28,7 @@ interface SheetProps {
     tab: Tab
 }
 
-const onChange = async (event: FormEvent<HTMLInputElement>) => {
+export const onChange = async (event: FormEvent<HTMLInputElement>) => {
     console.log("Form changed. "+ event.currentTarget.name + ": " + event.currentTarget.value);
 
     event.preventDefault();
@@ -37,8 +37,16 @@ const onChange = async (event: FormEvent<HTMLInputElement>) => {
         $set: Object()
     }
 
-    updateObj.$set[event.currentTarget.name] = event.currentTarget.value;
-    update(updateObj);
+    let reload = false;
+
+    let value: any = event.currentTarget.value;
+    if(event.currentTarget.name.endsWith("value")) {
+        reload = true;
+        value = parseInt(event.currentTarget.value);
+    }
+
+    updateObj.$set[event.currentTarget.name] = value;
+    update(updateObj, reload);
 }
 
 const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -59,7 +67,8 @@ export default function Sheet(props: SheetProps) {
                         props.tab == Tab.Main ? <MainTab character={props.character} setPopup={setPopup}></MainTab> : <></>
                     }
                     { popup.open && 
-                        <Popup toggle={() => setPopup({ open: false })} open={popup.open} title={popup.title}>
+                        <Popup character={props.character} arg={popup.arg} toggle={() => { setPopup({ open: false }); refresh(); }} 
+                            open={popup.open} getTitle={popup.getTitle}>
                             { popup.getChildren ? popup.getChildren(props.character, popup.arg ? popup.arg : "") : <></> }
                         </Popup>
                     } 

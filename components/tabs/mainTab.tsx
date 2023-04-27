@@ -20,7 +20,7 @@ export default function MainTab(props: MainTabProps) {
     });
 
     return <div>
-        <div className="max-w-[8%]">
+        <div className="max-w-[5%]">
             {abilityScores}
         </div>
     </div>
