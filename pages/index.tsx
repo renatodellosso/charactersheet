@@ -7,6 +7,7 @@ import { emailToID } from '@/lib/db/users';
 import Router from 'next/router';
 import { getServerSession } from 'next-auth';
 import { Character } from '@/lib/characterDefs';
+import toast from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -36,6 +37,14 @@ async function newCharacter() {
   }
 }
 
+function createNewCharacter() {
+  toast.promise(newCharacter(), {
+    loading: "Creating new character...",
+    success: "Created new character!",
+    error: "Failed to create new character."
+  });
+}
+
 async function goToSheet(id: string) {
   console.log("Going to sheet... Id: " + id);
   Router.push( { pathname: `/protected/sheet`, query: {
@@ -61,7 +70,7 @@ export default function Home(props: IndexProps) {
               {character.name}
             </button>)}
         </div>
-        <button onClick={() => newCharacter()} className='ml-2 mr-2'><strong>Create new character</strong></button>
+        <button onClick={() => createNewCharacter()} className='ml-2 mr-2'><strong>Create new character</strong></button>
       </main>
     );
 
