@@ -33,5 +33,7 @@ export interface Character {
         wis: Stat,
         cha: Stat,
         [key: string]: Stat
-    }
+    },
+    race: string,
+    classes: string
 }

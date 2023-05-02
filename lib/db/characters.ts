@@ -17,7 +17,9 @@ function initCharacter(owner: ObjectId): Character {
             int: new Stat("Int", 10, "Intelligence"),
             wis: new Stat("Wis", 10, "Wisdom"),
             cha: new Stat("Cha", 10, "Charisma"),
-        }
+        },
+        race: "",
+        classes: ""
     }
 } 
 
